@@ -6,8 +6,6 @@ type AuthData = {
   signed: boolean;
   user: User | null;
   loading: boolean;
-  signOut: () => void;
-  checkLogin: () => void;
   authenticate: () => void;
   setLoading: (value: boolean) => void;
 }
@@ -20,40 +18,18 @@ type AuthProviderProps = {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) =>
 {
+  const authenticator = new Authenticator()
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  async function signOut() {
-
-  }
-
-  async function checkLogin() {
-    try {
-      setLoading(true);
-      const userData = await localStorage.getItem('userData');
-
-      if(userData) {
-        const userJson = JSON.parse(userData);
-
-        setUser(userJson);
-      }
-
-      setLoading(false);
-    } catch(err) {
-      return signOut();
-    }
-  }
-
   const authenticate = async() => {
-    const authenticator = new Authenticator()
-
     const userAuth = await authenticator.loginWithGoogle();
 
     setUser(userAuth);
   }
 
   useEffect(() => {
-    checkLogin();
+    authenticator.validateLogin(setUser);
   }, []);
 
   return (
@@ -62,9 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) =>
       user,
       loading,
       setLoading,
-      authenticate,
-      signOut,
-      checkLogin
+      authenticate
     }}>
       {children}
     </AuthContext.Provider>
